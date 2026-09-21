@@ -45,7 +45,25 @@ description: 生成或改写中文软件技术方案，并交付带标题、方�
 - 正文放在 `#content` 内。目录脚本只读取 `#content h2, #content h3, #content h4`。
 - 保留 `#toc`、`#toc-count`、`.sidebar`、`.progress` 等模板钩子；若调整名称，要同步修改脚本。
 - 标题可自带稳定 `id`。没有 `id` 时脚本会生成 `heading-N`；不要让两个标题使用相同 `id`。
-- 若加入 Mermaid，采用渐进增强：图表源代码在渲染失败时仍可见，并根据明暗主题选择主题。
+- 若加入 Mermaid，采用渐进增强：图表源代码在渲染失败或外部脚本不可用时仍可见，并根据明暗主题重新渲染。不要把业务名称、图表数量或固定图形类型写进公共模板。
+- 每个 Mermaid 图表使用下列通用结构。三个按钮和 `data-mermaid-action` 不得省略；图表源码中的 `<`、`>` 和 `&` 仍须进行 HTML 转义。
+
+```html
+<div class="mermaid-wrapper">
+  <div class="mermaid-controls" aria-label="图表缩放控制">
+    <button type="button" data-mermaid-action="zoom-out" title="缩小">−</button>
+    <button type="button" data-mermaid-action="reset" title="重置">⊙</button>
+    <button type="button" data-mermaid-action="zoom-in" title="放大">+</button>
+  </div>
+  <div class="mermaid">flowchart LR
+    A[开始] --&gt; B[结束]
+  </div>
+</div>
+```
+
+- Mermaid 图表必须支持按钮缩放、鼠标或触屏拖拽平移、`Ctrl/Command + 滚轮` 缩放和双击重置。交互逻辑使用模板的事件委托，不为单个图表复制脚本或使用内联 `onclick`。
+- Mermaid SVG 必须设置 `max-width:none;width:auto;min-width:fit-content`，确保宽图可在容器内横向滚动，不被父容器宽度约束。
+- 每个 `<div class="mermaid-wrapper">` 和内部的 `<div class="mermaid">` 都必须有正确的闭合标签 `</div>`，避免后续内容被吞入图表容器。
 - 代码内容必须先进行 HTML 转义，尤其是 `<`、`>` 和 `&`；根据代码真实语言设置 `language-*`，无法判断时使用 `language-plaintext`，不要依赖自动语言猜测。
 - 引用本地需求或脚本时使用相对链接，确保 HTML 与关联文件一起移动后仍可访问。
 
@@ -53,9 +71,13 @@ description: 生成或改写中文软件技术方案，并交付带标题、方�
 
 运行：
 
+从当前 Skill 的安装目录运行，不假设 Skill 固定安装在 `.agents`、`.codex` 或 `.claude`：
+
 ```bash
-python $HOME/.agents/skills/technical-solution-html/scripts/validate_html.py <生成文件.html>
+python <skill-directory>/scripts/validate_html.py <生成文件.html>
 ```
+
+例如，Claude Code 可使用 `${CLAUDE_SKILL_DIR}/scripts/validate_html.py`；其他宿主先解析当前 Skill 目录，再传入脚本的实际路径。不要把示例安装路径写入生成的 HTML。
 
 校验通过后，再人工确认：
 
@@ -65,6 +87,7 @@ python $HOME/.agents/skills/technical-solution-html/scripts/validate_html.py <�
 - 目录超出视口时，目录自身滚动而正文位置不抖动；
 - 约 390px 宽度下无正文遮挡，表格与代码块可横向滚动；
 - Java、SQL 等代码块有清晰的关键字、字符串、注释和数字配色；断网时代码仍可阅读；
+- Mermaid 图表的缩放、拖拽、双击重置和主题切换正常；断网或 Mermaid 加载失败时仍显示图表源码；
 - 宽屏下页面能利用完整视口宽度，不应被固定在居中的窄内容区；
 - 打印预览中正文完整，目录、主题按钮、返回顶部按钮和进度条隐藏。
 
