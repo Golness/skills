@@ -10,8 +10,18 @@
 # 克隆仓库
 git clone https://github.com/Golness/skills.git ~/skills
 
-# 链接单个 Skill 到 Claude Code
+# 链接到 Claude Code
 ln -s ~/skills/technical-solution-html ~/.claude/skills/technical-solution-html
+
+# 链接到 Codex
+ln -s ~/skills/technical-solution-html ~/.codex/skills/technical-solution-html
+```
+
+Windows 下使用 PowerShell 创建软链接：
+
+```powershell
+New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\technical-solution-html" -Target "D:\project\skills\technical-solution-html"
+New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.codex\skills\technical-solution-html" -Target "D:\project\skills\technical-solution-html"
 ```
 
 链接后修改源文件立即生效，无需重新安装。
